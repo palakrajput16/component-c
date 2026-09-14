@@ -20,10 +20,13 @@ Edge-case rules:
 import numpy as np
 import pandas as pd
 from scipy.stats import kendalltau, ttest_rel
+from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "data"
 
-TRUTH_PATH = "truth.csv"
-RESULTS_PATH = "results_extended.csv"
+TRUTH_PATH = DATA_DIR / "truth.csv"
+RESULTS_PATH = DATA_DIR / "results_extended.csv"
 
 # Named pair for the power analysis
 PAIR = ("c1", "c2")
