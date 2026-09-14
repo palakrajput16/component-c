@@ -91,10 +91,11 @@ Week_1/data/results.csv
 Week_1/data/truth.csv
 ```
 
-To generate the extended results, open a terminal in the `Week_1` folder and run:
+To generate the extended results, open a terminal in the `Week_1/src` folder and run:
 
 ```bash
-python src/generate_results.py
+cd Week_1/src
+python generate_results.py
 ```
 
 This generates:
@@ -117,10 +118,10 @@ The supplied replicate 1 at `n_sub = 100` is preserved, and the remaining result
 
 ## Step 2: Compute the Four Statistics
 
-After `results_extended.csv` has been generated, run:
+After `results_extended.csv` has been generated, stay in the `Week_1/src` folder and run:
 
 ```bash
-python src/compute_statistics.py
+python compute_statistics.py
 ```
 
 The script reads:
@@ -229,9 +230,9 @@ Contains the decisions and rules for handling edge cases. This document will be 
 To reproduce the complete Week 1 analysis from the repository:
 
 ```bash
-cd Week_1
-python src/generate_results.py
-python src/compute_statistics.py
+cd Week_1/src
+python generate_results.py
+python compute_statistics.py
 ```
 
 The first command creates or refreshes:
