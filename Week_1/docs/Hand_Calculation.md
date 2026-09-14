@@ -1,4 +1,65 @@
-#  Power (Replicate 1, Pair: c1 vs c2)
+
+## 1. Winner-Correct Rate
+
+Winner-correct rate measures how often the classifier with the highest observed mean AUC is also the classifier with the highest true AUC.
+
+For each replicate:
+
+1. Calculate the mean AUC for each classifier.
+2. Select the classifier with the highest mean AUC as the observed winner.
+3. Find the true winner from `truth.csv`.
+4. If the observed winner and true winner are the same, record 1.
+5. If they are different, record 0.
+6. Repeat for all valid replicates.
+
+Winner-correct rate = Number of correct winners / Number of valid replicates
+
+### Example: Replicate 1
+
+For `n_sub = 100`, replicate 1:
+
+| Classifier | Fold 1 | Fold 2 | Fold 3 | Fold 4 | Fold 5 | Mean AUC |
+|---|---:|---:|---:|---:|---:|---:|
+| c1 | 0.81 | 0.78 | 0.84 | 0.80 | 0.82 | 0.810 |
+| c2 | 0.86 | 0.83 | 0.80 | 0.85 | 0.81 | 0.830 |
+
+Mean AUC for c1:
+
+(0.81 + 0.78 + 0.84 + 0.80 + 0.82) / 5
+
+= 4.05 / 5
+
+= 0.810
+
+Mean AUC for c2:
+
+(0.86 + 0.83 + 0.80 + 0.85 + 0.81) / 5
+
+= 4.15 / 5
+
+= 0.830
+
+Therefore:
+
+Observed winner = c2
+
+The true winner is determined using the highest true AUC in `truth.csv`.
+
+If the true winner is c2:
+
+Winner-correct = 1
+
+If the true winner is c1:
+
+Winner-correct = 0
+
+The same process is repeated for all 20 replicates.
+
+Final calculation:
+
+Winner-correct rate = Number of correct replicates / 20
+
+##  Power (Replicate 1, Pair: c1 vs c2)
 
 We're testing whether c1 is detectably better than c2, using the 5 paired fold scores from replicate 1 (n_sub = 100).
 
@@ -68,3 +129,4 @@ Since |t| doesn't clear the critical value, the result is **not statistically si
 - Classification: **no detection**
 
 Note that even though the mean difference (−0.02) actually points the wrong way, in c2's favor, that alone doesn't make it a "sign error." A sign error only applies when the test is significant AND points the wrong direction. Here it's not significant at all, so "no detection" is the correct label, not "sign error." That distinction is worth remembering if the professor asks about it in the oral defence, since it's an easy point to get backwards.
+
