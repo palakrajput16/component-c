@@ -1,5 +1,5 @@
 <<<<<<< HEAD
-# Winner-Correct Rate.
+# Winner-Correct Rate
 
 Winner-correct rate measures how often the classifier selected as the observed winner is also the true winner.
 
@@ -308,6 +308,7 @@ Winner-correct rate = 100%
 |---:|---|---:|---:|---:|---:|
 | 100 | c1 | 18 | 2 | 20 | 0.90 (90%) |
 | 500 | c1 | 20 | 0 | 20 | 1.00 (100%) |
+
 
 ##  Power (Replicate 1, Pair: c1 vs c2)
 =======
