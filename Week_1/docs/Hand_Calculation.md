@@ -1,5 +1,5 @@
 <<<<<<< HEAD
-# Winner-Correct Rate
+# Winner-Correct Rate.
 
 Winner-correct rate measures how often the classifier selected as the observed winner is also the true winner.
 
