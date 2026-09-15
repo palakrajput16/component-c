@@ -3,7 +3,7 @@
 ## Submission Information
 
 **Component:** C  
-**Group Number:** __________  
+**Group Number:** 4
 **Week:** 1  
 **Course:** CSIT332 - Principles of Machine Learning
 
