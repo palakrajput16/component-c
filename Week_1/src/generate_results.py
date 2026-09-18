@@ -34,9 +34,9 @@ NOISE_STD_N500 = 0.012
 
 CLASSIFIERS = ["c1", "c2", "c3"]
 
-GIVEN_RESULTS_PATH = "results.csv"
-TRUTH_PATH = "truth.csv"
-OUTPUT_PATH = "results_extended.csv"
+GIVEN_RESULTS_PATH = "../data/results.csv"
+TRUTH_PATH = "../data/truth.csv"
+OUTPUT_PATH = "../data/results_extended.csv"
 
 
 # -----------------------------
