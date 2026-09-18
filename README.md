@@ -51,14 +51,15 @@ Component_C/
     │
     ├── docs/
     │   ├── Week_1_Hand_Calculations.pdf
-    │   └── Edge_Cases.pdf
+    │   ├── Edge_Cases.pdf
+    │   ├── Summary_Results.pdf
+    │   └── RESPONSE_TO_FEEDBACK.md
     │
     └── src/
         ├── generate_results.py
-        └── compute_statistics.py
+        ├── compute_statistics.py
+        └── test_edge_cases.py
 ```
-
-`Edge_Cases.pdf` should be added once the edge-case document is completed.
 
 ---
 
@@ -135,34 +136,64 @@ and prints the results for both sample sizes.
 
 ---
 
+## Step 3: Run the Edge-Case Test Suite
+
+The statistics code was revised to generalize beyond 3 classifiers, detect ties, and validate the structure of each replicate before use, in response to feedback on the original submission. `test_edge_cases.py` proves this on small, hand-built synthetic datasets where the correct answer is known in advance.
+
+Stay in the `Week_1/src` folder and run:
+
+```bash
+python test_edge_cases.py
+```
+
+Expected output ends with:
+
+```text
+17 passed, 0 failed
+```
+
+See `docs/RESPONSE_TO_FEEDBACK.md` for what each test proves and why.
+
+---
+
 # Expected Output
 
 The current results produced by the code are:
 
 ```text
-True best classifier: c1 (true_auc = 0.85)
+Classifiers found in truth.csv: ['c1', 'c2', 'c3']
+True best classifier: c1  (truth_is_tied = False)
+Power pair: ('c1', 'c2')
 
 --- n_sub = 100 ---
-  n_replicates_used: 20
+  n_classifiers: 3
   n_replicates_dropped: 0
   dropped_replicate_ids: []
-  tie_count: 0
+  n_replicates_with_structural_issues: 0
+  tie_count_observed: 0
+  truth_is_tied: False
+  n_replicates_skipped_for_truth_tie: 0
   winner_correct_rate: 0.9
   mean_kendall_tau: 0.9333333333333333
-  mean_optimism: 0.00408100000000004
-  power_c1_vs_c2: 0.3
+  mean_optimism: 0.004081000000000068
+  power: 0.3
   sign_error_rate: 0.0
+  n_insufficient_paired_obs: 0
 
 --- n_sub = 500 ---
-  n_replicates_used: 20
+  n_classifiers: 3
   n_replicates_dropped: 0
   dropped_replicate_ids: []
-  tie_count: 0
+  n_replicates_with_structural_issues: 0
+  tie_count_observed: 0
+  truth_is_tied: False
+  n_replicates_skipped_for_truth_tie: 0
   winner_correct_rate: 1.0
   mean_kendall_tau: 1.0
-  mean_optimism: -0.0018839999999999523
-  power_c1_vs_c2: 0.85
+  mean_optimism: -0.0018839999999999634
+  power: 0.85
   sign_error_rate: 0.0
+  n_insufficient_paired_obs: 0
 ```
 
 ### Summary
@@ -213,7 +244,11 @@ Computes:
 - power for c1 vs c2
 - sign-error rate
 
-for both `n_sub = 100` and `n_sub = 500`.
+for both `n_sub = 100` and `n_sub = 500`. Classifiers are read dynamically from `truth.csv` rather than hardcoded, so the code works for any number of classifiers. Every replicate is validated for missing classifiers, missing folds, duplicate folds, unexpected fold numbers, and unequal fold counts before its statistics are used, and ties (both observed and in truth) are explicitly detected and handled.
+
+### `test_edge_cases.py`
+
+Synthetic, hand-built tests proving the validation and tie-handling behaviour in `compute_statistics.py` actually works, since `truth.csv` and `results.csv` don't contain any of these cases themselves. Run it directly for a PASS/FAIL report against 17 checks.
 
 ### `Week_1_Hand_Calculations.pdf`
 
@@ -221,7 +256,11 @@ Contains the manual calculations for the required statistics and verification ag
 
 ### `Edge_Cases.pdf`
 
-Contains the decisions and rules for handling edge cases. This document will be added after the edge-case work is finalized.
+Contains the decisions and rules for handling edge cases.
+
+### `RESPONSE_TO_FEEDBACK.md`
+
+Maps each point of feedback received on the original submission to exactly what changed in the code and which test in `test_edge_cases.py` proves it.
 
 ---
 
@@ -233,6 +272,7 @@ To reproduce the complete Week 1 analysis from the repository:
 cd Week_1/src
 python generate_results.py
 python compute_statistics.py
+python test_edge_cases.py
 ```
 
 The first command creates or refreshes:
@@ -242,6 +282,8 @@ data/results_extended.csv
 ```
 
 The second command calculates and prints the statistics from that file.
+
+The third command runs the synthetic edge-case tests and should end with `17 passed, 0 failed`.
 
 The results should match the values reported in the written work.
 
@@ -269,7 +311,7 @@ classifier_id
 true_auc
 ```
 
-Each replicate contains 3 classifiers and 5 folds per classifier.
+This toy dataset happens to contain 3 classifiers and 5 folds per classifier per replicate. The code itself does not assume this, `compute_statistics.py` reads the classifier list from `truth.csv` dynamically and has been tested with as many as 6 classifiers (see `test_edge_cases.py`).
 
 ---
 
@@ -278,12 +320,15 @@ Each replicate contains 3 classifiers and 5 folds per classifier.
 The Week 1 submission contains:
 
 - Statistics code
+- Synthetic edge-case test suite
 - Data-generation code
 - `truth.csv`
 - `results.csv`
 - Extended `results_extended.csv`
 - Hand-calculation PDF
 - Edge-case PDF
+- Summary results PDF
+- Response-to-feedback document
 
 All files are contained within the `component-c` repository.
 
@@ -296,3 +341,4 @@ All files are contained within the `component-c` repository.
 - The hand calculations use the supplied replicate 1 data at `n_sub = 100`.
 - The Python implementation has been checked against the hand calculations.
 - Edge-case decisions are documented separately in `Edge_Cases.pdf`.
+- The code was revised after initial feedback to generalize beyond 3 classifiers, detect ties (both observed and in truth), and validate replicate structure before use; `test_edge_cases.py` and `RESPONSE_TO_FEEDBACK.md` document this.
