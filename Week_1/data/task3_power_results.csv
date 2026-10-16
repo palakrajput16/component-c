@@ -1,0 +1,9 @@
+sample_size,pair,true_auc_gap,true_better,power,sign_error_rate,no_detection,insufficient_data,valid_tests,pair_type
+50,gb vs knn,0.0015859999999999763,gb,0.05,0.04,91,0,100,Close pair
+50,dtree vs logreg,0.12902099999999994,logreg,0.18,0.0,82,0,100,Wide-gap pair
+100,gb vs knn,0.018339000000000105,gb,0.08,0.01,91,0,100,Close pair
+100,dtree vs logreg,0.14943700000000004,logreg,0.42,0.0,58,0,100,Wide-gap pair
+200,gb vs knn,0.040574,gb,0.14,0.0,86,0,100,Close pair
+200,dtree vs logreg,0.15581500000000004,logreg,0.52,0.0,48,0,100,Wide-gap pair
+500,gb vs knn,0.0634030000000001,gb,0.38,0.0,62,0,100,Close pair
+500,dtree vs logreg,0.14154100000000003,logreg,0.87,0.0,13,0,100,Wide-gap pair

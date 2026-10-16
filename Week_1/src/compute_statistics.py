@@ -23,30 +23,30 @@ ties (both in the observed scores and in truth.csv itself).
 import pandas as pd
 from scipy.stats import kendalltau, ttest_rel
 
-TRUTH_PATH = "../data/truth.csv"
-RESULTS_PATH = "../data/results_extended.csv"
+TRUTH_PATH = "component-c-main/Week_1/data/reference_truth.csv"
+RESULTS_PATH = "component-c-main/Week_1/data/reference_results.csv"
 EXPECTED_FOLDS = [1, 2, 3, 4, 5]
 
 
-def load_truth():
-    """Read truth.csv and return the true AUC values, the list of
-    classifiers, the true best classifier, and whether truth.csv itself
-    has a tie for the best classifier."""
 
+def load_truth():
+    """Load truth values by sample size and classifier."""
     truth = pd.read_csv(TRUTH_PATH)
 
     true_auc = {}
     for _, row in truth.iterrows():
-        true_auc[row["classifier_id"]] = row["true_auc"]
+        classifier = row["classifier_id"]
+        n_sub = str(row["n_sub"]).strip()
+        true_auc[(n_sub, classifier)] = row["true_auc"]
 
-    classifiers = sorted(true_auc.keys())
+    classifiers = sorted(truth["classifier_id"].unique())
 
-    best_value = max(true_auc.values())
-    best_classifiers = [c for c in classifiers if true_auc[c] == best_value]
-    truth_tie = len(best_classifiers) > 1
-    true_best = sorted(best_classifiers)[0]  # alphabetical tie-break if tied
+    asymptotic_auc = {
+        classifier: true_auc[("asymptotic", classifier)]
+        for classifier in classifiers
+    }
 
-    return true_auc, classifiers, true_best, truth_tie
+    return true_auc, asymptotic_auc, classifiers
 
 
 def get_mean_auc(rep_data, classifiers):
@@ -108,6 +108,121 @@ def get_paired_folds(rep_data, classifier_a, classifier_b):
 
     return list(merged["auc_a"]), list(merged["auc_b"])
 
+
+def compute_pair_power(df, true_auc, pair, n_sub):
+    """Calculate power and sign-error rate for one classifier pair."""
+    c1, c2 = pair
+    key_n = str(n_sub)
+
+    auc_1 = true_auc[(key_n, c1)]
+    auc_2 = true_auc[(key_n, c2)]
+
+    if auc_1 == auc_2:
+        raise ValueError(f"The pair has tied true AUCs at n={n_sub}.")
+
+    true_better = c1 if auc_1 > auc_2 else c2
+
+    correct = 0
+    sign_errors = 0
+    valid_tests = 0
+    no_detection = 0
+    insufficient_data = 0
+
+    for _, rep_data in df.groupby("replicate_id"):
+        folds_1, folds_2 = get_paired_folds(rep_data, c1, c2)
+
+        if len(folds_1) < 2:
+            insufficient_data += 1
+            continue
+
+        _, p_value = ttest_rel(folds_1, folds_2)
+        observed_diff = sum(
+            a - b for a, b in zip(folds_1, folds_2)
+        ) / len(folds_1)
+
+        valid_tests += 1
+
+        if p_value < 0.05 and observed_diff != 0:
+            observed_better = c1 if observed_diff > 0 else c2
+
+            if observed_better == true_better:
+                correct += 1
+            else:
+                sign_errors += 1
+        else:
+            no_detection += 1
+
+    return {
+        "sample_size": n_sub,
+        "pair": f"{c1} vs {c2}",
+        "true_auc_gap": abs(auc_1 - auc_2),
+        "true_better": true_better,
+        "power": correct / valid_tests if valid_tests else None,
+        "sign_error_rate": (
+            sign_errors / valid_tests if valid_tests else None
+        ),
+        "no_detection": no_detection,
+        "insufficient_data": insufficient_data,
+        "valid_tests": valid_tests,
+    }
+
+def compute_pair_power(df, true_auc, classifiers, pair, n_sub):
+    """Calculate power and sign-error rate for one pair and sample size."""
+    c1, c2 = pair
+    true_auc_1 = true_auc[(str(n_sub), c1)]
+    true_auc_2 = true_auc[(str(n_sub), c2)]
+
+    # Determine the genuinely better classifier at this sample size.
+    if true_auc_1 == true_auc_2:
+        raise ValueError(
+            f"The selected pair has tied true AUCs at n={n_sub}."
+        )
+
+    true_better = c1 if true_auc_1 > true_auc_2 else c2
+
+    correct = 0
+    sign_errors = 0
+    valid_tests = 0
+    no_detection = 0
+    insufficient_data = 0
+
+    for _, rep_data in df.groupby("replicate_id"):
+        folds_1, folds_2 = get_paired_folds(rep_data, c1, c2)
+
+        if len(folds_1) < 2:
+            insufficient_data += 1
+            continue
+
+        _, p_value = ttest_rel(folds_1, folds_2)
+        observed_diff = sum(
+            a - b for a, b in zip(folds_1, folds_2)
+        ) / len(folds_1)
+
+        valid_tests += 1
+
+        if p_value < 0.05 and observed_diff != 0:
+            observed_better = c1 if observed_diff > 0 else c2
+
+            if observed_better == true_better:
+                correct += 1
+            else:
+                sign_errors += 1
+        else:
+            no_detection += 1
+
+    return {
+        "sample_size": n_sub,
+        "pair": f"{c1} vs {c2}",
+        "true_auc_gap": abs(true_auc_1 - true_auc_2),
+        "true_better": true_better,
+        "power": correct / valid_tests if valid_tests else None,
+        "sign_error_rate": (
+            sign_errors / valid_tests if valid_tests else None
+        ),
+        "no_detection": no_detection,
+        "insufficient_data": insufficient_data,
+        "valid_tests": valid_tests,
+    }
 
 def compute_stats(df, true_auc, classifiers, true_best, truth_tie, pair):
     """Compute all four statistics for one sample size."""
@@ -190,25 +305,58 @@ def compute_stats(df, true_auc, classifiers, true_best, truth_tie, pair):
     }
 
 
+
+
 def main():
-    true_auc, classifiers, true_best, truth_tie = load_truth()
+    true_auc, asymptotic_auc, classifiers = load_truth()
     df = pd.read_csv(RESULTS_PATH)
 
-    pair = (classifiers[0], classifiers[1])
+    close_pair = ("gb", "knn")
+    wide_pair = ("dtree", "logreg")
+    pairs = [
+        ("Close pair", close_pair),
+        ("Wide-gap pair", wide_pair),
+    ]
 
     print("Classifiers:", classifiers)
-    print("True best classifier:", true_best, "| truth has a tie:", truth_tie)
-    print("Power is calculated for the pair:", pair)
+    all_results = []
+
+    for label, pair in pairs:
+        c1, c2 = pair
+        gap_50 = abs(true_auc[("50", c1)] - true_auc[("50", c2)])
+
+        print(f"{label} selected at n=50: {c1} vs {c2}; true AUC gap = {gap_50:.6f}")
+
+        if label == "Close pair" and gap_50 >= 0.01:
+            raise ValueError("Close pair must have an AUC gap below 0.01.")
+        if label == "Wide-gap pair" and gap_50 <= 0.05:
+            raise ValueError("Wide-gap pair must have an AUC gap above 0.05.")
+
     print()
 
     for n in sorted(df["n_sub"].unique()):
         df_n = df[df["n_sub"] == n]
-        results = compute_stats(df_n, true_auc, classifiers, true_best, truth_tie, pair)
 
-        print(f"--- n_sub = {n} ---")
-        for key, value in results.items():
-            print(f"  {key}: {value}")
-        print()
+        for label, pair in pairs:
+            result = compute_pair_power(df_n, true_auc, classifiers, pair, n)
+            result["pair_type"] = label
+            all_results.append(result)
+
+            print(
+                f"n={n}, {label}, pair={result['pair']}, "
+                f"gap={result['true_auc_gap']:.6f}, "
+                f"power={result['power']}, "
+                f"sign_error_rate={result['sign_error_rate']}"
+            )
+
+    results_df = pd.DataFrame(all_results)
+    results_df.to_csv(
+        "component-c-main/Week_1/data/task3_power_results.csv", 
+        index=False
+    )
+
+    print("\nSaved results to component-c-main/Week_1/data/task3_power_results_v2.csv")
+    print(results_df.to_string(index=False))
 
 
 if __name__ == "__main__":
