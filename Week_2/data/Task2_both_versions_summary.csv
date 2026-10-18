@@ -1,0 +1,5 @@
+n_sub,replicates,winner_correct_rate_A,winner_correct_rate_B,mean_optimism_A,mean_optimism_B,observed_tie_replicates
+50,100,0.420000,0.130000,0.105854,-0.035243,4
+100,100,0.400000,0.100000,0.055894,-0.043918,4
+200,100,0.470000,0.050000,0.040562,-0.021601,2
+500,100,0.690000,0.080000,0.021963,-0.009097,1
