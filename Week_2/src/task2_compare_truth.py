@@ -26,12 +26,13 @@ import pandas as pd
 
 
 # File locations
-FOLDER = Path(__file__).resolve().parent
+FOLDER = Path(__file__).resolve().parent.parent
+
 RESULTS_FILE = FOLDER / "data" / "reference_results.csv"
 TRUTH_FILE = FOLDER / "data" / "reference_truth.csv"
 
-DETAILS_FILE = FOLDER / "task2_per_replicate.csv"
-SUMMARY_FILE = FOLDER / "task2_summary.csv"
+DETAILS_FILE = FOLDER / "data" / "task2_per_replicate.csv"
+SUMMARY_FILE = FOLDER / "data" / "task2_summary.csv"
 
 SAMPLE_SIZES = [50, 100, 200, 500]
 EXPECTED_REPLICATES = 100
