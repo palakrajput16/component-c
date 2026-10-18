@@ -1,12 +1,13 @@
-# Task 2 — Comparing the Two Definitions of Truth
+# Week 2 Task 2 — Comparing the Two Definitions of Truth
 
-Version A evaluates the declared winner against the classifier with the highest true AUC at the same sample size. This answers whether a researcher selected the best classifier for the amount of training data available. Version B evaluates the declared winner against the classifier with the highest asymptotic AUC, which represents the abundant-data benchmark.
+**Version A** compares the selected classifier with the classifier that has the highest true AUC at the current sample size. **Version B** compares the selected classifier with the classifier that has the highest asymptotic true AUC.
 
-The best classifier changes with sample size in the supplied truth file. Logistic regression has the highest true AUC at sample sizes 50 and 100, while SVM has the highest true AUC at 200 and 500. Gradient boosting has the highest asymptotic AUC. Therefore, a classifier can be the correct choice for a small sample even though it is not the asymptotic winner.
+In these results, Version A follows the expected qualitative pattern: its optimism is positive and generally decreases as sample size grows, while its winner-correct rate rises to 0.69 at n=500. Version B has negative optimism at all four sample sizes, and its winner-correct rate stays low, between 0.05 and 0.13. This happens because Version B always judges the selected classifier against the asymptotic winner, even when a different classifier has the highest true AUC at the current sample size.
 
-In the supplied reference results, Version A winner-correct rate is 42%, 40%, 47%, and 69% at sample sizes 50, 100, 200, and 500. Version B is 13%, 10%, 5%, and 8%. Version A improves overall at the largest sample size, while Version B remains low because it judges every decision against gradient boosting's abundant-data ranking, even where another classifier is genuinely better at the current sample size.
+Our calculated Version A optimism values, rounded to three decimal places, are **+0.106, +0.056, +0.041, and +0.022** for n=50, 100, 200, and 500. The Week 2 sheet states **+0.085, +0.062, +0.038, and +0.020**. The overall pattern is similar, but the values differ. We will ask the professor to confirm the intended input files and calculation convention. We have not changed the calculated values to force a match.
 
-Mean optimism is calculated as the declared winner's mean cross-validation AUC minus that same classifier's true AUC. Version A optimism is +0.105854, +0.055894, +0.040562, and +0.021963. Version B optimism is -0.035243, -0.043918, -0.021601, and -0.009097. The negative Version B values mean the winning classifier's observed cross-validation score is, on average, below its asymptotic true AUC. This comparison illustrates that asymptotic truth mixes selection effects with changes in model performance as training size changes, whereas sample-size-specific truth targets the decision a researcher can make with the data they actually have.
+The combined results file `data/Task1_Task2_combined_results.csv` brings together the Week 2 winner-correct and optimism values with Kendall's tau, power, and sign-error rate from `Task1_results_table.csv`. The power and sign-error columns retain the Task 1 comparison `gb_vs_svm`.
 
-## Verification note
-The Week 2 brief lists indicative Version A optimism values of approximately +0.085, +0.062, +0.038, and +0.020. The values calculated from the supplied reference CSVs do not exactly match that sequence. These results should be verified against the exact LMS files and the instructor's intended treatment of ties and aggregation before final submission. Do not change values merely to force agreement with the indicative figures.
+## Tie handling
+
+When classifiers share the highest observed mean cross-validation AUC, the alphabetically first classifier is recorded as the declared winner, and that replicate is counted as incorrect for both winner-correct rates. This convention should be confirmed with the professor if the course specifies a different tie rule.
